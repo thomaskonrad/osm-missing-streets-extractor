@@ -9,7 +9,7 @@ import progress
 def main():
     parser = argparse.ArgumentParser(description="Look for streets in the OGD table that are not covered by "
                                                  "OpenStreetMap and write them into another table.")
-    parser.add_argument("-H", "--hostname", dest="hostname", required=True, help="Host name or IP Address")
+    parser.add_argument("-H", "--hostname", dest="hostname", required=False, help="Host name or IP Address")
     parser.add_argument("-d", "--database", dest="database", required=True, help="The name of the database")
     parser.add_argument("-u", "--user", dest="user", required=False, help="The database user")
     parser.add_argument("-p", "--password", dest="password", required=False, help="The database password")

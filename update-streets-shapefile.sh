@@ -51,7 +51,7 @@ echo "$(current_time) Creating tables and converting data..."
 psql -d ${database_name} -f ${DIR}create-tables-and-convert-data.sql
 
 echo "$(current_time) Calculating street coverage and inserting data into newly created table..."
-${DIR}osm-missing-streets-extractor.py -H localhost -d ${database_name} > /dev/null
+${DIR}osm-missing-streets-extractor.py -d ${database_name} > /dev/null
 
 echo "$(current_time) Creating shapefile..."
 export PGCLIENTENCODING=LATIN1
