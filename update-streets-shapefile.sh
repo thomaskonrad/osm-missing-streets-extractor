@@ -44,8 +44,8 @@ echo "$(current_time) Dropping all tables..."
 psql -d ${database_name} -f ${DIR}drop-all.sql
 
 echo "$(current_time) Importing OGD Styria shapefiles..."
-shp2pgsql -I -s 94258 "${working_directory}${path_low}" ${table_low} | psql93 -d ${database_name} > /dev/null
-shp2pgsql -I -s 94258 "${working_directory}${path_high}" ${table_high} | psql93 -d ${database_name} > /dev/null
+shp2pgsql -I -s 94258 "${working_directory}${path_low}" ${table_low} | psql -d ${database_name} > /dev/null
+shp2pgsql -I -s 94258 "${working_directory}${path_high}" ${table_high} | psql -d ${database_name} > /dev/null
 
 echo "$(current_time) Creating tables and converting data..."
 psql -d ${database_name} -f ${DIR}create-tables-and-convert-data.sql
