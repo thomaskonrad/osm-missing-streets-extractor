@@ -41,3 +41,6 @@ CREATE TABLE styria_streets_uncovered
     coverage integer,
     CONSTRAINT styria_streets_uncovered_pkey PRIMARY KEY (objectid)
 );
+
+-- Create an index on the objectid column
+create index idx_styria_streets_objectid ON styria_streets (objectid);
