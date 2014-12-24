@@ -69,13 +69,11 @@ insert into styria_streets_uncovered
         end,
         ST_AsEWKT(s.geom2) as geom,
         'Land Steiermark - data.steiermark.gv.at; geoimage.at' as source,
-        round(cast((sum(ST_Length(ST_Intersection(ST_Buffer(l.way, 10, 'endcap=flat join=round'), s.geom2))) / ST_Length(s.geom2) * 100.0) as numeric), 0) as coverage
-    from planet_osm_line l
+        round(cast((sum(ST_Length(ST_Intersection(l.buffer, s.geom2))) / ST_Length(s.geom2) * 100.0) as numeric), 0) as coverage
+    from osm_street_buffer l
     left join styria_streets s on (
         ST_Intersects(l.way, ST_Envelope(s.geom2)))
-    where
-        l.highway is not null
-        and s.objectid = %s
+    where s.objectid = %s
     group by objectid, nametext, s.edgecatego, s.geom2;
         """
 
