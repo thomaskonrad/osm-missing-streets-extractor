@@ -37,8 +37,8 @@ wget --quiet ${link_low} -O "${working_directory}${file_low}"
 wget --quiet ${link_high} -O "${working_directory}${file_high}"
 
 echo "$(current_time) Unzipping downloaded files..."
-unzip -q "${working_directory}${file_low}" -d ${working_directory}
-unzip -q "${working_directory}${file_high}" -d ${working_directory}
+unzip -oq "${working_directory}${file_low}" -d ${working_directory}
+unzip -oq "${working_directory}${file_high}" -d ${working_directory}
 
 echo "$(current_time) Dropping all tables..."
 psql -d ${database_name} -f ${DIR}drop-all.sql
