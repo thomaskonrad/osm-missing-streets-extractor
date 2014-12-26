@@ -33,8 +33,8 @@ exec 2> >(tee -a ${log_file} >&2)
 echo "$(current_time) Starting update of the shapefile containing OGD Styria streets that are missing in OSM"
 
 echo "$(current_time) Downloading latest OGD Styria street data..."
-#wget --quiet ${link_low} -O "${working_directory}${file_low}"
-#wget --quiet ${link_high} -O "${working_directory}${file_high}"
+wget --quiet ${link_low} -O "${working_directory}${file_low}"
+wget --quiet ${link_high} -O "${working_directory}${file_high}"
 
 echo "$(current_time) Unzipping downloaded files..."
 unzip -oq "${working_directory}${file_low}" -d ${working_directory}
@@ -57,5 +57,8 @@ echo "$(current_time) Creating shapefile..."
 export PGCLIENTENCODING=LATIN1
 pgsql2shp -k -f ${working_directory}${target_basename}.shp ${database_name} \
     "select name, highway, fixme, ST_Transform(geom, 4326), source from styria_streets_uncovered where coverage < 50"
+
+# Link the file to the web root to make it downloadable
+ln -s ${working_directory}${target_basename}.shp web/${target_basename}.shp
 
 echo "$(current_time) All done."
