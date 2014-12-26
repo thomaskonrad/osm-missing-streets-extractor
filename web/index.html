@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html class="no-js">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>OpenStreetMap Styria Missing Streets</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link href='http://fonts.googleapis.com/css?family=Roboto:400,700,900,400italic,500,500italic,700italic,900italic' rel='stylesheet' type='text/css'>
+
+        <link rel="stylesheet" href="css/bootstrap.min.css">
+        <style>
+            body {
+                padding-top: 50px;
+                padding-bottom: 20px;
+            }
+        </style>
+    </head>
+    <body>
+    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">OpenStreetMap Styria Missing Streets</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>Missing Streets in OpenStreetMap Styria</h1>
+
+        <p>This site provides a daily updated shapefile with streets from the
+            <a href="http://data.steiermark.at/cms/ziel/95564282/DE/">Open Government Data Portal Styria</a> that are
+            not yet covered in <a href="http://www.openstreetmap.org">OpenStreetMap</a>.
+        </p>
+
+        <a class="btn btn-lg btn-success" href="osm-missing-streets-from-ogd-styria.shp">
+            <i class="glyphicon glyphicon-download"></i>
+            Download shapefile of missing streets
+        </a>
+
+        <h2>Technical Background</h2>
+
+        <p>I take the prepared shapefiles
+            from the <a href="https://github.com/species/OGD-stmk-daten/tree/master/Stra%C3%9Fennetz">Github project of
+            the user &quot;species&quot;</a>. Then I specified a certain buffer around the street chunks in
+            OpenStreetMap and then determine which street chunks in the OGD Styria data lie within these buffers and
+            which don't. I then dump those which are only covered by less than 50 % into a shapefile.
+        </p>
+
+        <p>
+            For more details on the data extraction implementation see the corresponding
+            <a href="https://github.com/thomaskonrad/osm-missing-streets-extractor">Github project</a>.
+        </p>
+
+        <div class="row">
+            <div class="col-sm-6 col-md-6">
+                <div class="thumbnail">
+                    <img src="img/osm-styria-streets-buffer.png" alt="OSM Styria Streets Buffer" class="img-thumbnail">
+                    <div class="caption">
+                        <h3>Using ST_Buffer from PostGIS</h3>
+                        <p>
+                            First, a buffer is drawn around the OpenStreetMap streets (green). Then, the portion of the
+                            OGD Styria streets (red) which lies within that buffer is measured. This way, it can be
+                            determined how much of the OGD Styria street is already covered.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-md-6">
+                <div class="thumbnail">
+                    <img src="img/osm-styria-streets-coverage.png" alt="OSM Styria Streets Buffer" class="img-thumbnail">
+                    <div class="caption">
+                        <h3>Visualization of missing streets</h3>
+                        <p>
+                            This image shows the region around Eichkögl in south-eastern Styria where some low-level
+                            streets are missing. Green are the streets in OpenStreetMap (this also includes tracks and
+                            paths). The OGD Styria streets are highlighted in red.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h2>OGD-OSM Highway Type Mapping</h2>
+
+        <p>
+            In order to differenciate different types of streets, tracks and paths, OpenStreetMap uses the "highway"
+            tag. In the data offered by OGD Styria, there is a similar tag with the same purpose: It is called
+            "edgecatego" (edge category, I guess). The following ones are defined (I derived this information from
+            my common sense and the definitions on
+            <a href="http://de.wikipedia.org/wiki/Stra%C3%9Fensystem_in_%C3%96sterreich">this Wikipedia page</a>):
+
+            <ul>
+                <li><strong>A</strong>: Autobahn (motorway)</li>
+                <li><strong>S</strong>: Schnellstraße (express highway)</li>
+                <li><strong>B</strong>: Bundesstraße (federal highway)</li>
+                <li><strong>L</strong>: Landesstraße (state road)</li>
+                <li><strong>P</strong>: Öffentliche Privatstraße (street that is publicly accessible, but privately owned, such as the Großglockner Hochalpenstraße)</li>
+                <li><strong>G</strong>: Gemeindestraße (rural road)</li>
+                <li><strong>I</strong>: Interessentenstraße (service road)</li>
+                <li><strong>PS</strong>: Privatstraße (private road)</li>
+            </ul>
+        </p>
+
+        <p>
+            I conducted a study where I tried to find out if there is a more-or-less distinct mapping between the OGD
+            and the OSM edgecatego / highway types. The short answer: The lower the street level, the less deterministic
+            is the mapping.
+        </p>
+
+        <pre>edgecatego=A (Autobahn)
+=======================
+highway=motorway      87 %
+highway=motorway_link  9 %
+other                  3 %
+
+edgecatego=S (Schnellstraße)
+============================
+highway=motorway      81 %
+highway=motorway_link 15 %
+other                  4 %
+
+edgecatego=B (Bundesstraße)
+===========================
+highway=primary       86 %
+other                 14 %
+
+edgecatego=L (Landesstraße)
+===========================
+highway=secondary     70 %
+highway=tertiary      22 %
+other                  8 %
+
+edgecatego=P (Öffentliche Privatstraße)
+=======================================
+highway=secondary     46 %
+highway=unclassified  20 %
+highway=service       19 %
+other                 15 %
+
+edgecatego=G (Gemeindestraße)
+=============================
+highway=unclassified  44 %
+highway=residential   28 %
+highway=service       10 %
+other                 18 %
+
+edgecatego=I (Interessentenstraße)
+==================================
+highway=unclassified  36 %
+highway=track         24 %
+highway=service       21 %
+highway=residential   15 %
+other                  4 %
+
+edgecatego=PS (Privatstraße)
+============================
+highway=service       36 %
+highway=track         26 %
+highway=unclassified  21 %
+highway=residential   14 %
+other                  3 %</pre>
+
+        <hr>
+
+        <footer>
+            <p>&copy; <a href="http://thomaskonrad.at">Thomas Konrad</a> 2014</p>
+        </footer>
+    </div> <!-- /container -->
+
+    <script src="js/bootstrap.min.js"></script>
+    </body>
+</html>
