@@ -36,6 +36,7 @@ select objectid from styria_streets
 where objectid not in (
     select objectid from styria_streets_uncovered
 )
+limit 100
         """)
     except Exception as e:
         print("I can't SELECT the not-yet-calculated streets (%s)!" % e)
@@ -57,15 +58,17 @@ insert into styria_streets_uncovered
     select
         s.objectid as objectid,
         s.nametext as name,
-        case
+        case -- "highway" tag (pretty deterministic mapping)
             when s.edgecatego='A' then 'motorway'       -- Autobahn
             when s.edgecatego='S' then 'motorway'       -- Schnellstraße
             when s.edgecatego='B' then 'primary'        -- Bundesstraße
             when s.edgecatego='L' then 'secondary'      -- Landesstraße
-            when s.edgecatego='P' then 'secondary'      -- Öffentliche Privatstraße (z.B. Großglockner Hochalpenstraße)
-            when s.edgecatego='G' then 'unclassified'   -- Gemeindestraße
-            when s.edgecatego='I' then 'service'        -- Interessentenstraße
-            when s.edgecatego='PS' then 'service'       -- Privatstraße
+        end,
+        case -- "fixme" tag (too undeterministic mapping)
+            when s.edgecatego='P'  then 'highway=secondary (46 %%), unclassified (20 %%), service (19 %%). Please delete this tag after the classification.'                  -- Öffentliche Privatstraße (z.B. Großglockner Hochalpenstraße)
+            when s.edgecatego='G'  then 'highway=unclassified (44 %%), residential (28 %%), service (10 %%). Please delete this tag after the classification.'                -- Gemeindestraße
+            when s.edgecatego='I'  then 'highway=unclassified (36 %%), track (24 %%), service (21 %%), residential (15 %%). Please delete this tag after the classification.' -- Interessentenstraße
+            when s.edgecatego='PS' then 'highway=service (36 %%), track (26 %%), unclassified (21 %%), residential (14 %%). Please delete this tag after the classification.' -- Privatstraße
         end,
         ST_AsEWKT(s.geom2) as geom,
         'Land Steiermark - data.steiermark.gv.at; geoimage.at' as source,

@@ -36,6 +36,7 @@ CREATE TABLE styria_streets_uncovered
     objectid integer,
     name character varying(254),
     highway character varying(254),
+    fixme character varying(254),
     geom geometry(LineString,900913),
     source character varying(254),
     coverage integer,
