@@ -58,7 +58,10 @@ export PGCLIENTENCODING=LATIN1
 pgsql2shp -k -f ${working_directory}${target_basename}.shp ${database_name} \
     "select name, highway, fixme, ST_Transform(geom, 4326), source from styria_streets_uncovered where coverage < 50"
 
-# Link the file to the web root to make it downloadable
-ln -s ${working_directory}${target_basename}.shp web/${target_basename}.shp
+# Zip the files and link the zip file to the web root to make it downloadable
+shapefile_base_path=${working_directory}${target_basename}
+rm ${shapefile_base_path}.zip
+zip ${shapefile_base_path}.zip ${shapefile_base_path}.dbf ${shapefile_base_path}.prj ${shapefile_base_path}.shp ${shapefile_base_path}.shx
+ln -s ${working_directory}${target_basename}.zip ${DIR}web/${target_basename}.zip
 
 echo "$(current_time) All done."
