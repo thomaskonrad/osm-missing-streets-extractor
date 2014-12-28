@@ -53,6 +53,9 @@ psql -d ${database_name} -f ${DIR}create-tables-and-convert-data.sql
 echo "$(current_time) Calculating street coverage and inserting data into newly created table..."
 ${DIR}osm-missing-streets-extractor.py -d ${database_name} > /dev/null
 
+echo "$(current_time) Fixing NULL coverage..."
+psql -d ${database_name} -f ${DIR}null-coverage-to-zero-coverage.sql
+
 echo "$(current_time) Creating shapefile..."
 export PGCLIENTENCODING=LATIN1
 pgsql2shp -k -f ${working_directory}${target_basename}.shp ${database_name} \

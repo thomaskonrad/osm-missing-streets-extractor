@@ -73,7 +73,7 @@ insert into styria_streets_uncovered
         'Land Steiermark - data.steiermark.gv.at; geoimage.at' as source,
         round(cast((sum(ST_Length(ST_Intersection(l.buffer, s.geom2))) / ST_Length(s.geom2) * 100.0) as numeric), 0) as coverage
     from osm_street_buffer l
-    left join styria_streets s on (
+    right join styria_streets s on (
         ST_Intersects(l.way, ST_Envelope(s.geom2)))
     where s.objectid = %s
     group by objectid, nametext, s.edgecatego, s.geom2;
