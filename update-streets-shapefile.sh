@@ -65,6 +65,6 @@ pgsql2shp -k -f ${working_directory}${target_basename}.shp ${database_name} \
 shapefile_base_path=${working_directory}${target_basename}
 rm ${shapefile_base_path}.zip
 zip ${shapefile_base_path}.zip ${shapefile_base_path}.dbf ${shapefile_base_path}.prj ${shapefile_base_path}.shp ${shapefile_base_path}.shx
-ln -s ${working_directory}${target_basename}.zip ${DIR}web/${target_basename}.zip
+#ln -s ${working_directory}${target_basename}.zip ${DIR}web/${target_basename}.zip
 
 echo "$(current_time) All done."
