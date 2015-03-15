@@ -49,6 +49,7 @@ shp2pgsql -I -s 94258 "${working_directory}${path_high}" ${table_high} | psql -d
 
 echo "$(current_time) Creating tables and converting data..."
 psql -d ${database_name} -f ${DIR}create-tables-and-convert-data.sql
+psql -d ${database_name} -f ${DIR}pre-calculate-osm-street-buffers.sql
 
 echo "$(current_time) Calculating street coverage and inserting data into newly created table..."
 ${DIR}osm-missing-streets-extractor.py -d ${database_name} > /dev/null
