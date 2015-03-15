@@ -12,6 +12,8 @@ def main():
                                                  "OSM street types (highway).")
     parser.add_argument("-H", "--hostname", dest="hostname", required=True, help="Host name or IP Address")
     parser.add_argument("-d", "--database", dest="database", required=True, help="The name of the database")
+    parser.add_argument("-t", "--table", dest="table", required=True, help="The database table to read from")
+    parser.add_argument("-P", "--primary-key", dest="primary_key", required=True, help="The name of the primary key column")
     parser.add_argument("-u", "--user", dest="user", required=False, help="The database user")
     parser.add_argument("-p", "--password", dest="password", required=False, help="The database password")
 
@@ -32,7 +34,7 @@ def main():
     cur = conn.cursor()
 
     try:
-        cur.execute("select objectid from styria_streets")
+        cur.execute("select %s from %s" % (args.primary_key, args.table))
     except Exception as e:
         print("I can't SELECT (%s)!" % e)
 
@@ -56,13 +58,13 @@ select
     l.highway as target_type,
     sum(ST_Length(ST_Intersection(ST_Buffer(l.way, 10, 'endcap=flat join=round'), s.geom2))) as length
 from planet_osm_line l
-    left join styria_streets s on (
+    left join """ + args.table + """ s on (
             ST_Intersects(l.way, ST_Envelope(s.geom2)) and
             ST_Intersects(s.geom2, ST_Buffer(l.way, 10, 'endcap=flat join=round'))
         )
     where
         l.highway is not null
-        and s.objectid = %s
+        and s.""" + args.primary_key + """ = %s
     group by edgecatego, highway
         """
 
