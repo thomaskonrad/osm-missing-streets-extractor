@@ -4,6 +4,7 @@ import argparse
 import psycopg2
 import sys
 import progress
+import json
 
 
 def main():
@@ -11,10 +12,39 @@ def main():
                                                  "OpenStreetMap and write them into another table.")
     parser.add_argument("-H", "--hostname", dest="hostname", required=False, help="Host name or IP Address")
     parser.add_argument("-d", "--database", dest="database", required=True, help="The name of the database")
+    parser.add_argument("-r", "--region", dest="region", required=True, help="The region to extract streets for")
+    parser.add_argument("-t", "--table", dest="table", required=True, help="The database table to read from")
+    parser.add_argument("-P", "--primary-key", dest="primary_key", required=True, help="The name of the primary key column")
+    parser.add_argument("-n", "--name-column", dest="name_column", required=True, help="The name column")
+    parser.add_argument("-s", "--source-tag", dest="source_tag", required=True, help="The text that should be written into the OSM source tag")
     parser.add_argument("-u", "--user", dest="user", required=False, help="The database user")
     parser.add_argument("-p", "--password", dest="password", required=False, help="The database password")
 
     args = parser.parse_args()
+
+
+    # Read and parse the street type mapping file
+    street_mapping_select = "null, null,"
+
+    with open("street-type-mapping.json") as data_file:
+        data = json.load(data_file)
+
+        if args.region in data:
+            region_data = data[args.region]
+            street_mapping_select = "case "
+
+            for highway_mapping_key in region_data["highway"]:
+                street_mapping_select += "when s.%s='%s' then '%s'\n" % ("edgecatego", highway_mapping_key, region_data["highway"][highway_mapping_key])
+
+            street_mapping_select += "end as highway, "
+
+            street_mapping_select += "case "
+
+            for fixme_mapping_key in region_data["fixme"]:
+                street_mapping_select += "when s.%s='%s' then '%s'\n" % ("edgecatego", fixme_mapping_key, region_data["fixme"][fixme_mapping_key])
+
+            street_mapping_select += "end as fixme, "
+
 
     # Try to connect
     try:
@@ -32,9 +62,9 @@ def main():
 
     try:
         cur.execute("""
-select objectid from styria_streets
-where objectid not in (
-    select objectid from styria_streets_uncovered
+select """ + args.primary_key + """ from """ + args.table + """
+where """ + args.primary_key + """ not in (
+    select """ + args.primary_key + """ from """ + args.table + """_uncovered
 )
         """)
     except Exception as e:
@@ -44,6 +74,26 @@ where objectid not in (
     total = len(rows)
     processed = 0
 
+    statement = """
+insert into """ + args.table + """_uncovered
+    select objectid, name, highway, fixme, geom, source, round(cast((sum(intersection_length) / ogd_length * 100.0) as numeric), 0) as coverage
+    from
+        (select
+            s.""" + args.primary_key + """ as objectid,
+            s.""" + args.name_column + """ as name,
+            """ + street_mapping_select + """
+            ST_AsEWKT(s.geom2) as geom,
+            cast('""" + args.source_tag + """' as text) as source,
+            ST_Length(ST_Intersection(l.buffer, s.geom2)) as intersection_length,
+            ST_Length(s.geom2) as ogd_length
+        from osm_street_buffer l
+        right join """ + args.table + """ s on (
+            ST_Intersects(l.way, ST_Envelope(s.geom2)))
+        where s.""" + args.primary_key + """ = %s
+        group by """ + args.primary_key + """, """ + args.name_column + """, s.edgecatego, s.geom2, intersection_length) as subquery
+    group by objectid, name, highway, fixme, geom, source, ogd_length;
+    """
+
     progress.startprogress("Processing all streets")
 
     for source_street in rows:
@@ -52,34 +102,8 @@ where objectid not in (
 
         objectid = source_street[0]
 
-        statement = """
-insert into styria_streets_uncovered
-    select
-        s.objectid as objectid,
-        s.nametext as name,
-        case -- "highway" tag (pretty deterministic mapping)
-            when s.edgecatego='A' then 'motorway'       -- Autobahn
-            when s.edgecatego='S' then 'motorway'       -- Schnellstraße
-            when s.edgecatego='B' then 'primary'        -- Bundesstraße
-            when s.edgecatego='L' then 'secondary'      -- Landesstraße
-        end,
-        case -- "fixme" tag (too undeterministic mapping)
-            when s.edgecatego='P'  then 'highway=secondary (46 %%), unclassified (20 %%), service (19 %%). Please delete this tag after the classification.'                  -- Öffentliche Privatstraße (z.B. Großglockner Hochalpenstraße)
-            when s.edgecatego='G'  then 'highway=unclassified (44 %%), residential (28 %%), service (10 %%). Please delete this tag after the classification.'                -- Gemeindestraße
-            when s.edgecatego='I'  then 'highway=unclassified (36 %%), track (24 %%), service (21 %%), residential (15 %%). Please delete this tag after the classification.' -- Interessentenstraße
-            when s.edgecatego='PS' then 'highway=service (36 %%), track (26 %%), unclassified (21 %%), residential (14 %%). Please delete this tag after the classification.' -- Privatstraße
-        end,
-        ST_AsEWKT(s.geom2) as geom,
-        'Land Steiermark - data.steiermark.gv.at; geoimage.at' as source,
-        round(cast((sum(ST_Length(ST_Intersection(l.buffer, s.geom2))) / ST_Length(s.geom2) * 100.0) as numeric), 0) as coverage
-    from osm_street_buffer l
-    right join styria_streets s on (
-        ST_Intersects(l.way, ST_Envelope(s.geom2)))
-    where s.objectid = %s
-    group by objectid, nametext, s.edgecatego, s.geom2;
-        """
-
         try:
+            print(statement)
             cur.execute(statement, (objectid,))
             conn.commit()
         except Exception as e:

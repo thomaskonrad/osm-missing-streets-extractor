@@ -2,13 +2,10 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/"
 
-function current_time()
-{
-        date +%Y-%m-%d_%H:%M:%S
-}
+. ${DIR}current-time.sh
 
 if [ "$#" -ne 3 ]; then
-    echo "Usage: ./update-streets-shapefile.sh <log-directory> <shapefile-working-directory> <database-name>"
+    echo "Usage: ./update-streets-shapefile-styria.sh <log-directory> <shapefile-working-directory> <database-name>"
     exit 1
 fi
 
@@ -40,19 +37,15 @@ echo "$(current_time) Unzipping downloaded files..."
 unzip -oq "${working_directory}${file_low}" -d ${working_directory}
 unzip -oq "${working_directory}${file_high}" -d ${working_directory}
 
-echo "$(current_time) Dropping all tables..."
-psql -d ${database_name} -f ${DIR}drop-all.sql
-
 echo "$(current_time) Importing OGD Styria shapefiles..."
 shp2pgsql -I -s 94258 "${working_directory}${path_low}" ${table_low} | psql -d ${database_name} > /dev/null
 shp2pgsql -I -s 94258 "${working_directory}${path_high}" ${table_high} | psql -d ${database_name} > /dev/null
 
 echo "$(current_time) Creating tables and converting data..."
-psql -d ${database_name} -f ${DIR}create-tables-and-convert-data.sql
-psql -d ${database_name} -f ${DIR}pre-calculate-osm-street-buffers.sql
+psql -d ${database_name} -f ${DIR}create-tables-and-convert-data-styria.sql
 
 echo "$(current_time) Calculating street coverage and inserting data into newly created table..."
-${DIR}osm-missing-streets-extractor.py -d ${database_name} > /dev/null
+${DIR}osm-missing-streets-extractor.py -d ${database_name} -r styria -t styria_streets -P objectid -n nametext -s "Land Steiermark - data.steiermark.gv.at; geoimage.at"
 
 echo "$(current_time) Fixing NULL coverage..."
 psql -d ${database_name} -f ${DIR}null-coverage-to-zero-coverage.sql

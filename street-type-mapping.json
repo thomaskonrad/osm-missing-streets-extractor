@@ -1,0 +1,45 @@
+{
+  "styria": {
+    "highway": {
+      "A": "motorway",
+      "S": "motorway",
+      "B": "primary",
+      "L": "secondary"
+    },
+    "fixme": {
+      "P":  "highway=secondary (46 %%), unclassified (20 %%), service (19 %%). Please delete this tag after the classification.",
+      "G":  "highway=unclassified (44 %%), residential (28 %%), service (10 %%). Please delete this tag after the classification.",
+      "I":  "highway=unclassified (36 %%), track (24 %%), service (21 %%), residential (15 %%). Please delete this tag after the classification.",
+      "PS": "highway=service (36 %%), track (26 %%), unclassified (21 %%), residential (14 %%). Please delete this tag after the classification."
+    }
+  },
+  "carinthia": {
+    "highway": {
+      "A":  "motorway",
+      "B":  "primary",
+      "FS": "track",
+      "FW": "footway",
+      "L":  "secondary",
+      "PW": "track",
+      "R":  "residential",
+      "RW": "cycleway",
+      "S":  "trunk",
+      "SB": "track",
+      "U":  "cycleway",
+      "UR": "cycleway",
+      "VW": "service"
+    },
+    "fixme": {
+      "BA": "highway=track (47 %%), unclassified (39 %%). Please delete this tag after the classification.",
+      "EH": "highway=track (24 %%), residential (15 %%), service (13 %%), unclassified (13 %%). Please delete this tag after the classification.",
+      "EN": "highway=unclassified (34 %%), residential (32 %%), track (13 %%). Please delete this tag after the classification.",
+      "ES": "highway=unclassified (34 %%), residential (32 %%), track (13 %%). Please delete this tag after the classification.",
+      "G":  "highway=residential (49 %%), unclassified (20 %%), tertiary (14 %%). Please delete this tag after the classification.",
+      "GW": "highway=unclassified (42 %%), track (36 %%), residential (14 %%). Please delete this tag after the classification.",
+      "PO": "highway=residential (29 %%), secondary (21 %%), track (18 %%), service (16 %%). Please delete this tag after the classification.",
+      "PS": "highway=track (38 %%), residential (21 %%), unclassified (20 %%), service (17 %%). Please delete this tag after the classification.",
+      "SS": "highway=unclassified (43 %%), residential (24 %%), track (22 %%). Please delete this tag after the classification.",
+      "VS": "highway=residential (47 %%), unclassified (31 %%). Please delete this tag after the classification."
+    }
+  }
+}
