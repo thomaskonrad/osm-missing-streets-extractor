@@ -103,7 +103,6 @@ insert into """ + args.table + """_uncovered
         objectid = source_street[0]
 
         try:
-            print(statement)
             cur.execute(statement, (objectid,))
             conn.commit()
         except Exception as e:
