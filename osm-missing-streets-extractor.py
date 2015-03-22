@@ -5,6 +5,7 @@ import psycopg2
 import sys
 import progress
 import json
+import os
 
 
 def main():
@@ -26,7 +27,7 @@ def main():
     # Read and parse the street type mapping file
     street_mapping_select = "null, null,"
 
-    with open("street-type-mapping.json") as data_file:
+    with open(os.path.join(os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__))), "street-type-mapping.json")) as data_file:
         data = json.load(data_file)
 
         if args.region in data:
