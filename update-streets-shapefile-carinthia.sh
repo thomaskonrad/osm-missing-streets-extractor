@@ -38,7 +38,7 @@ echo "$(current_time) Creating tables and converting data..."
 psql -d ${database_name} -f ${DIR}create-tables-and-convert-data-carinthia.sql
 
 echo "$(current_time) Calculating street coverage and inserting data into newly created table..."
-${DIR}osm-missing-streets-extractor.py -d ${database_name} -r carinthia -t carinthia_streets -P gid -n featurenam -s "Land Kärnten - data.ktn.gv.at; geoimage.at"
+${DIR}osm-missing-streets-extractor.py -d ${database_name} -r carinthia -t carinthia_streets -P gid -n featurenam -s "Land Kärnten - data.ktn.gv.at; geoimage.at" > /dev/null
 
 echo "$(current_time) Fixing NULL coverage..."
 psql -d ${database_name} -f ${DIR}null-coverage-to-zero-coverage.sql
