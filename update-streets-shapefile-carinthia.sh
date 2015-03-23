@@ -41,7 +41,7 @@ echo "$(current_time) Calculating street coverage and inserting data into newly 
 ${DIR}osm-missing-streets-extractor.py -d ${database_name} -r carinthia -t carinthia_streets -P gid -n featurenam -s "Land Kärnten - data.ktn.gv.at; geoimage.at" > /dev/null
 
 echo "$(current_time) Fixing NULL coverage..."
-psql -d ${database_name} -f ${DIR}null-coverage-to-zero-coverage.sql
+psql -d ${database_name} -c "update carinthia_streets_uncovered set coverage = 0 where coverage is null;"
 
 echo "$(current_time) Creating shapefile..."
 export PGCLIENTENCODING=LATIN1

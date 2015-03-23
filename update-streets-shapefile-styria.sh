@@ -48,7 +48,7 @@ echo "$(current_time) Calculating street coverage and inserting data into newly 
 ${DIR}osm-missing-streets-extractor.py -d ${database_name} -r styria -t styria_streets -P objectid -n nametext -s "Land Steiermark - data.steiermark.gv.at; geoimage.at" > /dev/null
 
 echo "$(current_time) Fixing NULL coverage..."
-psql -d ${database_name} -f ${DIR}null-coverage-to-zero-coverage.sql
+psql -d ${database_name} -c "update styria_streets_uncovered set coverage = 0 where coverage is null;"
 
 echo "$(current_time) Creating shapefile..."
 export PGCLIENTENCODING=LATIN1
