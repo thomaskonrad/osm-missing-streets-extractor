@@ -26,7 +26,7 @@ exec 2> >(tee -a ${log_file} >&2)
 echo "$(current_time) Starting update of the shapefile containing OGD Carinthia streets that are missing in OSM"
 
 echo "$(current_time) Downloading latest OGD Carinthia street data..."
-wget --quiet ${link} -O "${working_directory}${file}"
+#wget --quiet ${link} -O "${working_directory}${file}"
 
 echo "$(current_time) Unzipping downloaded file..."
 unzip -oq "${working_directory}${file}" -d ${working_directory}
@@ -38,7 +38,7 @@ echo "$(current_time) Creating tables and converting data..."
 psql -d ${database_name} -f ${DIR}create-tables-and-convert-data-carinthia.sql
 
 echo "$(current_time) Calculating street coverage and inserting data into newly created table..."
-${DIR}osm-missing-streets-extractor.py -d ${database_name} -r carinthia -t carinthia_streets -P gid -n featurenam -s "Land Kärnten - data.ktn.gv.at; geoimage.at" > /dev/null
+${DIR}osm-missing-streets-extractor.py -d ${database_name} -r carinthia -t carinthia_streets -P gid -n featurenam -s "Land Kärnten - data.ktn.gv.at; geoimage.at"
 
 echo "$(current_time) Fixing NULL coverage..."
 psql -d ${database_name} -c "update carinthia_streets_uncovered set coverage = 0 where coverage is null;"
