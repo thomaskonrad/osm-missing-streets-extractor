@@ -23,6 +23,7 @@ def main():
 
     args = parser.parse_args()
 
+    show_progress = False
 
     # Read and parse the street type mapping file
     street_mapping_select = "null, null,"
@@ -66,7 +67,7 @@ def main():
 select """ + args.primary_key + """ from """ + args.table + """
 where """ + args.primary_key + """ not in (
     select """ + args.primary_key + """ from """ + args.table + """_uncovered
-)
+) limit 100
         """)
     except Exception as e:
         print("I can't SELECT the not-yet-calculated streets (%s)!" % e)
@@ -95,11 +96,13 @@ insert into """ + args.table + """_uncovered
     group by objectid, name, highway, fixme, geom, source, ogd_length;
     """
 
-    progress.startprogress("Processing all streets")
+    if show_progress:
+        progress.startprogress("Processing all streets")
 
     for source_street in rows:
-        percent = processed / total * 100.0
-        progress.progress(round(percent, 0))
+        if show_progress:
+            percent = processed / total * 100.0
+            progress.progress(round(percent, 0))
 
         objectid = source_street[0]
 
@@ -112,7 +115,8 @@ insert into """ + args.table + """_uncovered
 
         processed += 1
 
-    progress.endprogress()
+    if show_progress:
+        progress.endprogress()
 
 
 if __name__ == "__main__":
