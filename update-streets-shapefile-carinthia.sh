@@ -26,7 +26,7 @@ exec 2> >(tee -a ${log_file} >&2)
 echo "$(current_time) Starting update of the shapefile containing OGD Carinthia streets that are missing in OSM"
 
 echo "$(current_time) Downloading latest OGD Carinthia street data..."
-#wget --quiet ${link} -O "${working_directory}${file}"
+wget --quiet ${link} -O "${working_directory}${file}"
 
 echo "$(current_time) Unzipping downloaded file..."
 unzip -oq "${working_directory}${file}" -d ${working_directory}

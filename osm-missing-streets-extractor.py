@@ -67,7 +67,7 @@ def main():
 select """ + args.primary_key + """ from """ + args.table + """
 where """ + args.primary_key + """ not in (
     select """ + args.primary_key + """ from """ + args.table + """_uncovered
-) limit 100
+)
         """)
     except Exception as e:
         print("I can't SELECT the not-yet-calculated streets (%s)!" % e)

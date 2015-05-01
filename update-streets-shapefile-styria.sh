@@ -30,8 +30,8 @@ exec 2> >(tee -a ${log_file} >&2)
 echo "$(current_time) Starting update of the shapefile containing OGD Styria streets that are missing in OSM"
 
 echo "$(current_time) Downloading latest OGD Styria street data..."
-#wget --quiet ${link_low} -O "${working_directory}${file_low}"
-#wget --quiet ${link_high} -O "${working_directory}${file_high}"
+wget --quiet ${link_low} -O "${working_directory}${file_low}"
+wget --quiet ${link_high} -O "${working_directory}${file_high}"
 
 echo "$(current_time) Unzipping downloaded files..."
 unzip -oq "${working_directory}${file_low}" -d ${working_directory}
@@ -45,7 +45,7 @@ echo "$(current_time) Creating tables and converting data..."
 psql -d ${database_name} -f ${DIR}create-tables-and-convert-data-styria.sql
 
 echo "$(current_time) Calculating street coverage and inserting data into newly created table..."
-${DIR}osm-missing-streets-extractor.py -d ${database_name} -r styria -t styria_streets -P objectid -n nametext -s "Land Steiermark - data.steiermark.gv.at; geoimage.at"
+${DIR}osm-missing-streets-extractor.py -d ${database_name} -r styria -t styria_streets -P gid -n nametext -s "Land Steiermark - data.steiermark.gv.at; geoimage.at"
 
 echo "$(current_time) Fixing NULL coverage..."
 psql -d ${database_name} -c "update styria_streets_uncovered set coverage = 0 where coverage is null;"

@@ -7,7 +7,7 @@ update styria_streets set geom2 = ST_Transform(ST_LineMerge(geom), 900913);
 -- Linestrings from styria high
 insert into styria_streets
     select
-    gid + 1000000, objectid + 1000000, strcat, namealias, shape_leng,
+    gid + 1000000, strcat, namealias,
     null,
     ST_Transform(ST_LineMerge(ST_Force_2D(geom)), 900913)
     from styria_streets_high
@@ -18,8 +18,8 @@ create sequence seq_styria_streets_high minvalue 2100000;
 
 insert into styria_streets
     select
-    nextval('seq_styria_streets_high'), currval('seq_styria_streets_high'),
-    strcat, namealias, shape_leng,
+    nextval('seq_styria_streets_high'),
+    strcat, namealias,
     null,
     ST_Transform((ST_Dump(ST_Force_2D(geom))).geom, 900913)
     from styria_streets_high
@@ -44,4 +44,4 @@ CREATE TABLE styria_streets_uncovered
 );
 
 -- Create an index on the objectid column
-create index idx_styria_streets_objectid ON styria_streets (objectid);
+create index idx_styria_streets_gid ON styria_streets (gid);
